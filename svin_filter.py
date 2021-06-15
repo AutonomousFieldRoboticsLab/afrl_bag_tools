@@ -1,0 +1,2 @@
+not (topic.startswith('/okvis_node') or topic == '/tf' and set().union(*({T.header.frame_id, T.child_frame_id} for T in m.transforms)) & {'world', 'body', 'base_link'})
+# rosbag filter <in> <out> "$(cat svin_filter)"

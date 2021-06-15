@@ -37,7 +37,7 @@ class topic_modifier:
 
         self.left_caminfo_pub = rospy.Publisher("/left/camera_info", CameraInfo, queue_size=100)
         self.right_caminfo_pub = rospy.Publisher("/right/camera_info", CameraInfo, queue_size=100)
-       
+
 
     def parse_yaml_file(self, caminfo_filename, image_msg):
 

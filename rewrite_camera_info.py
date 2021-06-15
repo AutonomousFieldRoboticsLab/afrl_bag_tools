@@ -39,16 +39,6 @@ def parse_yaml_file(caminfo_filename):
 
     return camera_info_msg
 
-def left_image_callback(self, image_msg):
-    # Publish camera_info
-    left_camera_info_msg = self.parse_yaml_file(self.left_caminfo_filename, image_msg)
-    self.left_caminfo_pub.publish(left_camera_info_msg)
-
-def right_image_callback(self, image_msg):
-    # Publish camera_info
-    right_camera_info_msg = self.parse_yaml_file(self.right_caminfo_filename, image_msg)  
-    self.right_caminfo_pub.publish(right_camera_info_msg)
-
 def main():
     parser = argparse.ArgumentParser(description='ROS topics modifier')
     parser.add_argument("--left", required=True, help="Path to left camera info yaml file")

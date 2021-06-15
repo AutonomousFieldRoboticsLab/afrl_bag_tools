@@ -34,7 +34,7 @@ def dump_cam(K, D, R, P, Size, name):
     ret["projection_matrix"] = dump_matrix(P)
     return ret
 
-def convert(calib):
+def convert(calib, alpha):
     K0, D0 = load_cam(calib["cam0"])
     K1, D1 = load_cam(calib["cam1"])
     T_01 = np.linalg.inv(np.array(calib["cam1"]["T_cn_cnm1"]))
@@ -42,7 +42,7 @@ def convert(calib):
     T = T_01[:3,3]
     Size = tuple(calib["cam0"]["resolution"])  # Assumes both cameras have same resolution
 
-    R0, R1, P0, P1 = cv2.stereoRectify(cameraMatrix1=K0, cameraMatrix2=K1,  distCoeffs1=D0, distCoeffs2=D1, imageSize=Size, R=R, T=T, flags=cv2.CALIB_ZERO_DISPARITY, alpha=0)[:4]
+    R0, R1, P0, P1 = cv2.stereoRectify(cameraMatrix1=K0, cameraMatrix2=K1,  distCoeffs1=D0, distCoeffs2=D1, imageSize=Size, R=R, T=T, flags=cv2.CALIB_ZERO_DISPARITY, alpha=alpha)[:4]
 
     return dump_cam(K0, D0, R0, P0, Size, "cam_fl"), dump_cam(K1, D1, R1, P1, Size, "cam_fr")
 
@@ -71,17 +71,20 @@ def main():
     parser = argparse.ArgumentParser(description="Convert kalibr camera camchain file to format readable by OpenCV in ROS camera_calibration_parsers")
     parser.add_argument("infile", metavar="in", help="Input kalibr camchain yaml file")
     parser.add_argument("outdir", metavar="outdir", default=".", nargs="?", help="Output directory OpenCV yaml file")
+    parser.add_argument("--alpha", type=float, default=1.0, help="Stereo rectify alpha")
+    parser.add_argument("--stereo_only", action="store_true", help="Only generate opencv files from stereo")
     args = parser.parse_args()
 
     yaml.add_representer(OrderedDict, lambda self, d: self.represent_dict(d.iteritems()))
 
     in_calib = yaml.load(file(args.infile, 'r'))
-    out_calib_fl, out_calib_fr = convert(in_calib)
+    out_calib_fl, out_calib_fr = convert(in_calib, alpha=args.alpha)
     yaml.dump(out_calib_fl, file(join(args.outdir, "cam_fl.yaml"), 'w+'))
     yaml.dump(out_calib_fr, file(join(args.outdir, "cam_fr.yaml"), 'w+'))
 
-    out_calib_okvis_partial = okvis_partial(in_calib)
-    yaml.dump(out_calib_okvis_partial, file(join(args.outdir, "config_okvis.yaml"), 'w+'))
+    if not args.stereo_only:
+        out_calib_okvis_partial = okvis_partial(in_calib)
+        yaml.dump(out_calib_okvis_partial, file(join(args.outdir, "config_okvis.yaml"), 'w+'))
 
 if __name__=='__main__':
     main()
