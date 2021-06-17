@@ -24,13 +24,9 @@ import yaml
 
 class topic_modifier:
 
-    def __init__(self):
-        parser = argparse.ArgumentParser(description='ROS topics modifier')
-        parser.add_argument("--left", help="Path to left camera info yaml file")
-        parser.add_argument("--right", help="Path to right camera info yaml file")
-        args = parser.parse_args()
-        self.left_caminfo_filename = args.left
-        self.right_caminfo_filename = args.right
+    def __init__(self, left, right):
+        self.left_caminfo_filename = left
+        self.right_caminfo_filename = right
 
         self.left_subscriber = rospy.Subscriber("/left/image_raw", Image, self.left_image_callback, queue_size=100)
         self.right_subscriber = rospy.Subscriber("/right/image_raw", Image, self.right_image_callback, queue_size=100)
@@ -69,9 +65,10 @@ class topic_modifier:
 
 
 if __name__ == "__main__":
-    
-    topic_modifier = topic_modifier()
-    
     rospy.init_node('topic_modifier', anonymous=True)
+    left = rospy.get_param("~left")
+    right = rospy.get_param("~right")
+    topic_modifier = topic_modifier(left, right)
+    
     while(not rospy.is_shutdown()):
         rospy.spin()
