@@ -51,7 +51,7 @@ def main():
     right_msg = parse_yaml_file(args.right)
 
     with Bag(args.input) as ibag, Bag(args.output, "w") as obag:
-        for topic, msg, t in tqdm(ibag.read_messages()):
+        for topic, msg, t in tqdm(ibag.read_messages(), total=ibag.get_message_count()):
             if topic == "/cam_fl/camera_info":
                 left_msg.header.stamp = msg.header.stamp
                 obag.write(topic, left_msg, t)
