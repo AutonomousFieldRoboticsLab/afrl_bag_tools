@@ -11,7 +11,7 @@ from collections import OrderedDict
 
 def sync(left_msg, right_msg, left_info, right_info):
   # Matches timestamps in left and right messages
-  avg_stamp = rospy.Time(nsecs=(left_msg.header.stamp.to_nsec() + right_msg.header.stamp.to_nsec()) / 2)
+  new_stamp = rospy.Time(nsecs=min(left_msg.header.stamp.to_nsec(), right_msg.header.stamp.to_nsec()))
 
   if left_msg.header.stamp != left_info.header.stamp:
     print("WARN Mismatched left camera info. Image: %s, Camera Info: %s, Difference: %s"
@@ -22,10 +22,10 @@ def sync(left_msg, right_msg, left_info, right_info):
           % (right_msg.header.stamp, right_info.header.stamp,
              abs(right_msg.header.stamp.to_sec() - right_info.header.stamp.to_sec())))
 
-  left_msg.header.stamp = avg_stamp
-  right_msg.header.stamp = avg_stamp
-  left_info.header.stamp = avg_stamp
-  right_info.header.stamp = avg_stamp
+  left_msg.header.stamp = new_stamp
+  right_msg.header.stamp = new_stamp
+  left_info.header.stamp = new_stamp
+  right_info.header.stamp = new_stamp
 
   return left_msg, right_msg, left_info, right_info
 
